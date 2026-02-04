@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Attention Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="screen">
+    <h1 id="title">Attention Game</h1>
+    <p id="subtitle">press space to continue</p>
+</div>
+
+<form id="demographics" class="hidden">
+    <h2>Demographic Questions</h2>
+
+    <label>
+        Name (Feel free to use a fake name, but please make sure other information is accurate)
+        <input type="text" name="entry.280963074">
+    </label>
+
+    <label>
+        Birthday (MM/DD/YR) — e.g. 03/12/09
+        <input type="text" name="entry.90289892" placeholder="MM/DD/YY" required>
+    </label>
+
+    <label>
+        Current Date (MM/DD/YR)
+        <input type="text" name="entry.1194678358" placeholder="MM/DD/YY" required>
+    </label>
+
+    <label>
+        Are you a student or teacher/administrator?
+        <input type="text" name="entry.540422629" required>
+    </label>
+
+    <label>
+        What grade are you in? (9, 10, 11, or 12)
+        <input type="text" name="entry.2124972352">
+    </label>
+
+    <label>
+        Are you granted extra time for testing? (No, 1.5 time, or Double time)
+        <input type="text" name="entry.1938053400">
+    </label>
+
+    <label>
+        What is your current level of science? (Elective, Regular, or Intensive)
+        <input type="text" name="entry.1666836259">
+    </label>
+
+    <label>
+        What is your current level of math? (1, 3, 5, or 7)
+        <input type="text" name="entry.1720875399">
+    </label>
+
+    <label>
+        What subject do you teach, or what is your administrator role?
+        <input type="text" name="entry.294712038">
+    </label>
+
+    <label>
+        Self-report your daily screen time (e.g. "6 hrs")
+        <input type="text" name="entry.111459201">
+    </label>
+
+    <label>
+        Specify your screen time breakdown
+        <textarea name="entry.1261445692"
+        placeholder="e.g. 2 hrs social media, 1 hr video games, 3 hrs Google Classroom"></textarea>
+    </label>
+</form>
+
+<div id="thankyou" class="hidden">
+    <h1>Thank you for playing</h1>
+</div>
+
+<script>
+const screen = document.getElementById("screen");
+const title = document.getElementById("title");
+const subtitle = document.getElementById("subtitle");
+const form = document.getElementById("demographics");
+const thankyou = document.getElementById("thankyou");
+
+let state = 0;
+let gameActive = false;
+let startTime;
+let currentLetter = "";
+let letterStart;
+let gameDuration = 10 * 60 * 1000;
+let reactionTimes = [];
+
+document.addEventListener("keydown", e => {
+    if (e.code === "Space") {
+        e.preventDefault();
+        handleSpace();
+    }
+});
+
+function handleSpace() {
+    if (state === 0) showDirections();
+    else if (state === 1) startGame();
+    else if (gameActive && currentLetter === "X") {
+        reactionTimes.push(Date.now() - letterStart);
+    }
+}
+
+function showDirections() {
+    state = 1;
+    title.textContent = "Directions";
+    subtitle.innerHTML = `
+        Pay attention to the letter shown on your screen.<br><br>
+        The letter will change every few seconds.<br><br>
+        Whenever the letter <strong>X</strong> appears,
+        press the space bar as quickly as possible.<br><br>
+        <span class="small">press space to continue</span>
+    `;
+}
+
+function startGame() {
+    state = 2;
+    gameActive = true;
+    startTime = Date.now();
+    title.textContent = "";
+    subtitle.textContent = "";
+    runTrial();
+}
+
+function runTrial() {
+    if (Date.now() - startTime >= gameDuration) {
+        endGame();
+        return;
+    }
+
+    currentLetter = Math.random() < 0.2
+        ? "X"
+        : String.fromCharCode(65 + Math.floor(Math.random() * 26));
+
+    title.textContent = currentLetter;
+    letterStart = Date.now();
+
+    setTimeout(() => {
+        title.textContent = "";
+        currentLetter = "";
+        setTimeout(runTrial, (Math.floor(Math.random() * 3) + 1) * 1000);
+    }, 250);
+}
+
+function endGame() {
+    gameActive = false;
+    screen.classList.add("hidden");
+    form.classList.remove("hidden");
+
+    const fields = form.querySelectorAll("input, textarea");
+    fields[fields.length - 1].addEventListener("keydown", submitOnEnter);
+}
+
+function submitOnEnter(e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        submitForm();
+    }
+}
+
+function submitForm() {
+    const data = new FormData(form);
+    data.append(
+        "entry.1261445692",
+        data.get("entry.1261445692") +
+        "\nReaction times (ms): " + reactionTimes.join(", ")
+    );
+
+    fetch("https://docs.google.com/forms/d/e/YOUR_FORM_ID/formResponse", {
+        method: "POST",
+        mode: "no-cors",
+        body: data
+    });
+
+    form.classList.add("hidden");
+    thankyou.classList.remove("hidden");
+}
+</script>
+
+</body>
+</html>

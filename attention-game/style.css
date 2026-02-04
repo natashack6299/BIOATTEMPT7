@@ -1,0 +1,214 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Attention Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+
+<div id="screen">
+    <h1 id="title">Attention Game</h1>
+    <p id="subtitle">press space to continue</p>
+</div>
+
+
+<form id="demographics" class="hidden">
+    <h2>Demographic Questions</h2>
+
+
+    <label>Name (optional)
+        <input type="text" name="entry.280963074">
+    </label>
+
+
+    <label>Birthday
+        <input type="date" name="entry.90289892" required>
+    </label>
+
+
+    <label>Current Date
+        <input type="date" name="entry.1194678358" required>
+    </label>
+
+
+    <label>Grade / Position / Role
+        <input type="text" name="entry.540422629" required>
+    </label>
+
+
+    <label>Grade Level
+        <input type="text" name="entry.2124972352">
+    </label>
+
+
+    <label>Estimated weekday screen time (hours)
+        <input type="text" name="entry.111459201">
+    </label>
+
+
+    <label>Weekday screen time breakdown
+        <textarea name="entry.1261445692"></textarea>
+    </label>
+
+
+    <label>Estimated weekend screen time (hours)
+        <input type="text">
+    </label>
+
+
+    <label>Weekend screen time breakdown
+        <textarea></textarea>
+    </label>
+
+
+    <label>Extra time accommodations
+        <input type="text" name="entry.1938053400"
+               placeholder="Standard / 1.5x / 2x">
+    </label>
+
+
+    <label>Current level of Science
+        <input type="text" name="entry.1666836259">
+    </label>
+
+
+    <label>Current level of Math
+        <input type="text" name="entry.1720875399">
+    </label>
+
+
+    <label>What subject do you teach (if applicable)
+        <input type="text" name="entry.294712038">
+    </label>
+</form>
+
+
+<div id="thankyou" class="hidden">
+    <h1>Thank you for playing</h1>
+</div>
+
+
+<script>
+const screen = document.getElementById("screen");
+const title = document.getElementById("title");
+const subtitle = document.getElementById("subtitle");
+const form = document.getElementById("demographics");
+const thankyou = document.getElementById("thankyou");
+
+
+let state = 0;
+let gameActive = false;
+let startTime;
+let gameDuration = 10 * 60 * 1000;
+let currentLetter = "";
+let letterStartTime;
+let results = [];
+
+
+document.addEventListener("keydown", e => {
+    if (e.code === "Space" && !form.classList.contains("hidden")) return;
+    if (e.code === "Space") handleSpace();
+});
+
+
+function handleSpace() {
+    if (state === 0) showDirections();
+    else if (state === 1) startGame();
+    else if (gameActive && currentLetter === "X") {
+        results.push(Date.now() - letterStartTime);
+    }
+}
+
+
+function showDirections() {
+    state = 1;
+    title.textContent = "Directions";
+    subtitle.innerHTML = `
+        Pay attention to the letter shown on your screen.<br><br>
+        Press the space bar as quickly as possible whenever the letter
+        <strong>X</strong> appears.<br><br>
+        <span class="small">press space to continue</span>
+    `;
+}
+
+
+function startGame() {
+    state = 2;
+    gameActive = true;
+    startTime = Date.now();
+    title.textContent = "";
+    subtitle.textContent = "";
+    runTrial();
+}
+
+
+function runTrial() {
+    if (Date.now() - startTime >= gameDuration) {
+        endGame();
+        return;
+    }
+
+
+    currentLetter = Math.random() < 0.2
+        ? "X"
+        : String.fromCharCode(65 + Math.floor(Math.random() * 26));
+
+
+    title.textContent = currentLetter;
+    letterStartTime = Date.now();
+
+
+    setTimeout(() => {
+        title.textContent = "";
+        currentLetter = "";
+        setTimeout(runTrial, (Math.floor(Math.random() * 3) + 1) * 1000);
+    }, 250);
+}
+
+
+function endGame() {
+    gameActive = false;
+    screen.classList.add("hidden");
+    form.classList.remove("hidden");
+
+
+    const inputs = form.querySelectorAll("input, textarea");
+    inputs[inputs.length - 1].addEventListener("keydown", submitOnEnter);
+}
+
+
+function submitOnEnter(e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        submitToGoogleForm();
+    }
+}
+
+
+function submitToGoogleForm() {
+    const formData = new FormData(form);
+
+
+    // Optional: add reaction times as extra text
+    formData.append("entry.1261445692",
+        "Reaction times (ms): " + results.join(", ")
+    );
+
+
+    fetch("https://docs.google.com/forms/d/e/1FAIpQLSdVY3gTqkYRHXfqHcmA-AvBUbCaQJ5_Y79sMU7YvSd7adVyAg/viewform", {
+        method: "POST",
+        mode: "no-cors",
+        body: formData
+    });
+
+
+    form.classList.add("hidden");
+    thankyou.classList.remove("hidden");
+}
+</script>
+
+
+</body>
+</html>
