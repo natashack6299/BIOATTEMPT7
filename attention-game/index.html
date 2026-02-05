@@ -23,17 +23,17 @@
 
     <label>
         Birthday (MM/DD/YR) — e.g. 03/12/09
-        <input type="text" name="entry.90289892" placeholder="MM/DD/YY" required>
+        <input type="text" name="entry.90289892"
     </label>
 
     <label>
         Current Date (MM/DD/YR)
-        <input type="text" name="entry.1194678358" placeholder="MM/DD/YY" required>
+        <input type="text" name="entry.1194678358"
     </label>
 
     <label>
         Are you a student or teacher/administrator?
-        <input type="text" name="entry.540422629" required>
+        <input type="text" name="entry.540422629"
     </label>
 
     <label>
@@ -89,7 +89,7 @@ let gameActive = false;
 let startTime;
 let currentLetter = "";
 let letterStart;
-let gameDuration = 10 * 60 * 1000;
+let gameDuration = 60 * 500;
 let reactionTimes = [];
 
 document.addEventListener("keydown", e => {
@@ -172,7 +172,7 @@ function submitForm() {
         "\nReaction times (ms): " + reactionTimes.join(", ")
     );
 
-    fetch("https://docs.google.com/forms/d/e/1FAIpQLSdVY3gTqkYRHXfqHcmA-AvBUbCaQJ5_Y79sMU7YvSd7adVyAg/formResponce", {
+    fetch("https://docs.google.com/forms/d/e/1FAIpQLSdVY3gTqkYRHXfqHcmA-AvBUbCaQJ5_Y79sMU7YvSd7adVyAg/formResponse", {
         method: "POST",
         mode: "no-cors",
         body: data
@@ -185,5 +185,6 @@ function submitForm() {
 
 </body>
 </html>
+
 
 
