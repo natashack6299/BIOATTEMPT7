@@ -65,7 +65,8 @@ let trials = [];
    INPUT HANDLING
 ====================== */
 document.addEventListener("keydown", e => {
-    if (e.code === "Space") {
+    // Only trigger game space presses if NOT typing in a form field
+    if (e.code === "Space" && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
         e.preventDefault();
         handleSpace();
     }
@@ -266,6 +267,7 @@ function submitForm() {
     thankyou.classList.remove("hidden");
 }
 </script>
+
 
 
 
