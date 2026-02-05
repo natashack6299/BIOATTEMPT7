@@ -212,10 +212,10 @@ function submitForm() {
     const data = new FormData(form);
 
     // 🔽 REPLACE ENTRY IDS
-    data.append("entry.ACCURACY_ID", perf.accuracy.toFixed(2));
-    data.append("entry.RT_ID", perf.avgRT.toFixed(1));
-    data.append("entry.ACC_TREND_ID", trends.accuracyTrend.toFixed(4));
-    data.append("entry.RT_TREND_ID", trends.reactionTrend.toFixed(4));
+    data.append("entry.1599414603", perf.accuracy.toFixed(2));
+    data.append("entry.238420684", perf.avgRT.toFixed(1));
+    data.append("entry.627956812", trends.accuracyTrend.toFixed(4));
+    data.append("entry.1502638983", trends.reactionTrend.toFixed(4));
 
     fetch("https://docs.google.com/forms/d/e/1FAIpQLSdVY3gTqkYRHXfqHcmA-AvBUbCaQJ5_Y79sMU7YvSd7adVyAg/formResponse", {
         method: "POST",
@@ -227,6 +227,7 @@ function submitForm() {
     thankyou.classList.remove("hidden");
 }
 </script>
+
 
 
 
