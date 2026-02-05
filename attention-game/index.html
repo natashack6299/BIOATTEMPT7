@@ -6,12 +6,22 @@
     <title>Attention Game</title>
     <link rel="stylesheet" href="style.css">
 </head>
+   
 <body>
+  <div id="screen">
+      <h1 id="title">Attention Game</h1>
+      <p id="subtitle">press space to continue</p>
+  </div>
 
-<div id="screen">
-    <h1 id="title">Attention Game</h1>
-    <p id="subtitle">press space to continue</p>
-</div>
+  <form id="demographics" class="hidden">
+      <label>Name <input type="text" name="entry.280963074"></label>
+      <label>Birthday <input type="text" name="entry.90289892"></label>
+      <label>Current Date <input type="text" name="entry.1194678358"></label>
+  </form>
+
+  <div id="thankyou" class="hidden">
+      <h1>Thank you for playing</h1>
+  </div>
 
 <script>
 /* ======================
@@ -242,6 +252,7 @@ function submitForm() {
     thankyou.classList.remove("hidden");
 }
 </script>
+
 
 
 
