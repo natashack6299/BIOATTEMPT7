@@ -187,52 +187,81 @@ function computePerformance() {
 ====================== */
 function linearSlope(x, y) {
     const n = x.length;
-    const mx = x.reduce((a,b)=>a+b,0) / n;
-    const my = y.reduce((a,b)=>a+b,0) / n;
+    if (n < 2) return 0;
 
-    let num = 0, den = 0;
+    const meanX = x.reduce((a,b)=>a+b,0) / n;
+    const meanY = y.reduce((a,b)=>a+b,0) / n;
+
+    let num = 0;
+    let den = 0;
+
     for (let i = 0; i < n; i++) {
-        num += (x[i] - mx) * (y[i] - my);
-        den += (x[i] - mx) ** 2;
+        num += (x[i] - meanX) * (y[i] - meanY);
+        den += (x[i] - meanX) ** 2;
     }
+
     return den === 0 ? 0 : num / den;
 }
 
 function computeTrends(blockMs = 60000) {
-    let blocks = {};
+    const blocks = {};
 
+    // Group trials by time block
     trials.forEach(t => {
         const block = Math.floor((t.time - trials[0].time) / blockMs);
         if (!blocks[block]) blocks[block] = [];
         blocks[block].push(t);
     });
 
-    let time = [];
-    let acc = [];
-    let rt = [];
+    const timePoints = [];
+    const accuracyPoints = [];
+    const reactionTimePoints = [];
 
-    Object.keys(blocks).forEach((b, i) => {
-        let correct = 0;
-        let rts = [];
+    Object.keys(blocks)
+        .map(Number)
+        .sort((a,b) => a - b)
+        .forEach(block => {
 
-        blocks[b].forEach(t => {
-            if (t.letter === "X" && t.responded) {
-                correct++;
-                rts.push(t.reactionTime);
+            const blockTrials = blocks[block];
+            let hits = 0;
+            let correctRejects = 0;
+            let total = blockTrials.length;
+            let rtSum = 0;
+            let rtCount = 0;
+
+            blockTrials.forEach(t => {
+                if (t.letter === "X" && t.responded) {
+                    hits++;
+                    rtSum += t.reactionTime;
+                    rtCount++;
+                }
+                if (t.letter !== "X" && !t.responded) {
+                    correctRejects++;
+                }
+            });
+
+            const accuracy = (hits + correctRejects) / total;
+
+            timePoints.push(block * (blockMs / 60000)); // minutes
+            accuracyPoints.push(accuracy);
+
+            if (rtCount > 0) {
+                reactionTimePoints.push({
+                    time: block * (blockMs / 60000),
+                    rt: rtSum / rtCount
+                });
             }
-            if (t.letter !== "X" && !t.responded) correct++;
         });
 
-        time.push(i);
-        acc.push(correct / blocks[b].length);
-        rt.push(rts.length ? rts.reduce((a,b)=>a+b,0)/rts.length : null);
-    });
+    const rtTimes = reactionTimePoints.map(p => p.time);
+    const rtValues = reactionTimePoints.map(p => p.rt);
 
     return {
-        accuracyTrend: linearSlope(time, acc),
-        reactionTrend: linearSlope(time, rt.map(v => v ?? rt[0]))
+        accuracyTrend: linearSlope(timePoints, accuracyPoints),
+        reactionTrend: linearSlope(rtTimes, rtValues)
     };
 }
+
 
 /* ======================
    FORM SUBMISSION
@@ -266,6 +295,7 @@ function submitForm() {
     thankyou.classList.remove("hidden");
 }
 </script>
+
 
 
 
